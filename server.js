@@ -16,40 +16,80 @@ fs.readFile("E:\\Univer\\5 семестр\\ПСКП\\PSKP\\Лабы\\lab2\\PSKP-
     });
 
 const server = net.createServer(function(client){
-    const socetname =Date.now()+seed++;
-    console.log('Client connected');
+    fs.open('client_id.log','a',function (err, file_handler) {
+        if(!err){
+            const socetname =Date.now()+seed++;
+            console.log('Client connected');
+            fs.write(file_handler,socetname+": Client connected \n",null, 'utf-8', function(err, written){
+                if(err){
+                    console.log("Ошибка записии");
+                }
+            });
 
-client.setEncoding('utf8');
+            client.setEncoding('utf8');
 
-client.name = Date.now() + seed++;
+            client.on('data', function(data){
+                console.log('Client say: '+ data);
 
-client.on('data', function(data){
-    console.log('Client say: '+ data);
-    for(let i=0;i<q.length;i++){
-        if(q[i]==data){
-            client.write(a[getRandomInt(0,2)]);
-            return;
+                fs.write(file_handler,socetname+' say:'+ data+'\n',null, 'utf-8', function(err, written){
+                    if(err){
+                        console.log("Ошибка записии");
+                    }
+                });
+
+                for(let i=0;i<q.length;i++){
+                    if(q[i]==data){
+                        const str =a[getRandomInt(0,2)];
+                        client.write(str);
+                        fs.write(file_handler,socetname+' answer:'+ str+'\n',null, 'utf-8', function(err, written){
+                            if(err){
+                                console.log("Ошибка записии");
+                            }
+                        });
+                        return;
+                    }
+                }
+                switch (data){
+                    case 'QA':
+                    {
+                        client.write('ACK');
+                        fs.write(file_handler,socetname+' answer:'+ 'ACK'+'\n',null, 'utf-8', function(err, written){
+                            if(err){
+                                console.log("Ошибка записии");
+                            }
+                        });
+                    }break;
+                    default:
+                    {
+                        client.end('DEC','utf-8');
+                        fs.write(file_handler,socetname+' answer:'+ 'DEC'+'\n',null, 'utf-8', function(err, written){
+                            if(err){
+                                console.log("Ошибка записии");
+                            }
+                        });
+                    }break;
+                }
+
+            });
+
+            client.on('end', function(){ console.log('Client disconnected')
+                fs.write(file_handler,socetname+': Client disconnected\n',null, 'utf-8', function(err, written){
+                    if(err){
+                        console.log("Ошибка записии");
+                    }
+                });
+            } );
+
+
+        }else {
+            console.log("Ошибка открытия");
         }
-    }
-    switch (data){
-        case 'QA':
-        {
-            client.write('ACK');
-        }break;
-        default:
-        {
-            client.end('DEC','utf-8')
-        }break;
-    }
+    });
+
 
 });
-
-client.on('end', function(){ console.log('Client disconnected')});
-});
-
-server.listen(port, function() {
-    console.log(`Server listening on localhost:${port}`);
-});
+    server.listen(port, function() {
+        console.log(`Server listening on localhost:${port}`);});
 });
 
 function getRandomInt(min, max) {
