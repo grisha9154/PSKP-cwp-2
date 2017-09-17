@@ -26,13 +26,32 @@ fs.readFile("E:\\Univer\\5 семестр\\ПСКП\\PSKP\\Лабы\\lab2\\PSKP-
         console.log('Server sey: ' + data);
         switch (data) {
             case 'ACK': {
-
+                client.write(q[lastQestId]);
+                lastQestId++;
             }
                 break;
-            case 'END': {
-                client.end();
-            }
-                break;
+            case a[lastQestId-1]:{
+                console.log("Вопрос: "+q[lastQestId-1]+", Ответ: "+a[lastQestId-1]+" верно");
+                if (lastQestId<3){
+                   client.write(q[lastQestId]);
+                    lastQestId++
+                }
+                else{
+                    client.write('q');
+                }
+            }break;
+            case 'DEC': {
+            }break;
+            default:{
+                console.log("Вопрос: "+q[lastQestId-1]+", Ответ: "+data+" не верно");
+                if (lastQestId<3){
+                    client.write(q[lastQestId]);
+                    lastQestId++
+                }
+                else{
+                    client.write('q');
+                }
+            }break;
         }
     });
 
@@ -51,7 +70,5 @@ function setRandValue(q,a,key,data) {
         a[i] = data;
     }else setRandValue(q,a,key,data);
 }
-function next(key) {
-    
-}
+
 
